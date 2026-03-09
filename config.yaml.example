@@ -1,0 +1,142 @@
+# ePaper Dashboard Configuration
+
+# Display Settings
+display:
+  width: 1360
+  height: 480
+  refresh_interval: 60  # seconds between screen updates
+  full_refresh_cycles: 600  # full refresh every N partial refreshes
+
+# Location for weather
+location:
+  latitude: 47.3769  # Zurich, Switzerland
+  longitude: 8.5417
+
+# Widget Layout
+# Widgets are arranged in a grid. Specify position (x, y) and size (width, height) for each widget.
+widgets:
+  - name: porsche_taycan
+    type: taycan
+    enabled: true
+    position: [20, 20]
+    size: [440, 300]
+    update_interval: 120
+    initial_delay: 3
+    config:
+      url: "https://your-homeassistant.com"
+      token: "YOUR_LONG_LIVED_ACCESS_TOKEN"
+      battery_entity: "sensor.taycan_battery_level"
+      range_entity: "sensor.taycan_range"
+      charging_entity: "sensor.taycan_charging_status"
+      image_entity: "image.taycan_view_from_side"
+      mileage_entity: "sensor.taycan_mileage"
+
+  - name: home_assistant
+    type: homeassistant
+    enabled: false
+    position: [20, 340]
+    size: [420, 120]
+    update_interval: 60
+    initial_delay: 2
+    config:
+      url: "http://homeassistant.local:8123"
+      token: "YOUR_LONG_LIVED_ACCESS_TOKEN"
+      entities:
+        - entity_id: "sensor.living_room_temperature"
+          display_name: "Living Room"
+          icon: "icon_temp"
+        - entity_id: "sensor.outdoor_temperature"
+          display_name: "Outdoor"
+          icon: "icon_temp"
+        - entity_id: "light.living_room"
+          display_name: "Lights"
+          icon: "icon_bulb"
+        - entity_id: "sensor.total_power"
+          display_name: "Power"
+          icon: "icon_energy"
+          unit: "W"
+
+  - name: ubiquiti
+    type: ubiquiti
+    enabled: false
+    position: [20, 190]
+    size: [420, 120]
+    update_interval: 30
+    initial_delay: 5
+    config:
+      controller_url: "https://unifi.local:8443"
+      username: "YOUR_USERNAME"
+      password: "YOUR_PASSWORD"
+      site: "default"
+      verify_ssl: false
+      show:
+        - wan_status
+        - bandwidth
+        - client_count
+
+  - name: weather
+    type: weather
+    enabled: true
+    position: [460, 20]
+    size: [440, 460]
+    update_interval: 600
+    initial_delay: 0
+    config:
+      latitude: 47.3769
+      longitude: 8.5417
+      api_url: "https://api.open-meteo.com/v1/forecast"
+      aqi_url: "https://air-quality-api.open-meteo.com/v1/air-quality"
+      show_forecast: true
+      show_aqi: true
+
+  - name: clock
+    type: clock
+    enabled: true
+    position: [920, 20]
+    size: [420, 200]
+    update_interval: 30
+    config:
+      format: "24h"
+      show_date: true
+      show_day: true
+
+  - name: gmail
+    type: gmail
+    enabled: false
+    position: [920, 240]
+    size: [420, 80]
+    update_interval: 180
+    config:
+      token_path: "token.json"
+      credentials_path: "credentials.json"
+
+  # Optional: Additional widgets
+  - name: strava
+    type: strava
+    enabled: false
+    position: [20, 20]
+    size: [420, 130]
+    update_interval: 3600
+    config:
+      token_file: "strava_token.json"
+
+  - name: bambu
+    type: bambu
+    enabled: false
+    position: [20, 170]
+    size: [420, 150]
+    update_interval: 30
+    config:
+      ip: "192.168.1.100"
+      serial: "YOUR_PRINTER_SERIAL"
+      access_code: "YOUR_ACCESS_CODE"
+
+  - name: roborock
+    type: roborock
+    enabled: false
+    position: [20, 340]
+    size: [420, 120]
+    update_interval: 60
+    config:
+      email: "your-email@example.com"
+      token_file: "roborock_session.pkl"

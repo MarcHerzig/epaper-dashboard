@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Configuration (sensitive data)
+config.yaml
+*_token.json
+credentials.json
+*.pkl
+*.session
+
+# Logs
+*.log
+*.log.*
+
+# Emulator output
+emulator_output/
+*.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+lib_disabled/

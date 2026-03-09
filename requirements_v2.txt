@@ -1,0 +1,21 @@
+# Requirements for Modular ePaper Dashboard v2.0
+
+# Core dependencies
+Pillow>=10.0.0
+requests>=2.31.0
+PyYAML>=6.0
+
+# Home Assistant integration
+# (uses requests - no additional dependencies needed)
+
+# Ubiquiti UniFi integration
+urllib3>=2.0.0
+
+# Optional: For MQTT widgets (future)
+# aiomqtt
+
+# Optional: For existing widgets from v1
+# google-api-python-client
+# google-auth-httplib2
+# google-auth-oauthlib
+# roborock
