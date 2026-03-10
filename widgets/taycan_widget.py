@@ -14,9 +14,9 @@ class TaycanWidget(BaseWidget):
     Config Optionen:
         url: Home Assistant URL
         token: Long-lived access token
-        battery_entity: Entity ID für Batteriestand (z.B. sensor.taycan_battery_level)
-        range_entity: Entity ID für Reichweite (z.B. sensor.taycan_range)
-        charging_entity: Entity ID für Ladestatus (z.B. binary_sensor.taycan_charging)
+        battery_entity: Entity ID für Batteriestand
+        range_entity: Entity ID für Reichweite
+        charging_entity: Entity ID für Ladestatus
         image_url: URL zum Taycan Bild (optional)
         image_entity: Entity ID mit Bild URL (optional)
     """
@@ -30,8 +30,6 @@ class TaycanWidget(BaseWidget):
         self.battery_entity = config['config'].get('battery_entity', 'sensor.taycan_battery_level')
         self.range_entity = config['config'].get('range_entity', 'sensor.taycan_range')
         self.charging_entity = config['config'].get('charging_entity', 'binary_sensor.taycan_charging')
-        self.mileage_entity = config['config'].get('mileage_entity', None)
-        self.location_entity = config['config'].get('location_entity', None)
 
         # Bild Konfiguration
         self.image_url = config['config'].get('image_url', None)
@@ -54,8 +52,6 @@ class TaycanWidget(BaseWidget):
                 'battery': 0,
                 'range': 0,
                 'charging': False,
-                'mileage': 0,
-                'location': None,
                 'image_available': False
             }
 
@@ -93,28 +89,6 @@ class TaycanWidget(BaseWidget):
                 result['charging'] = any(keyword in state for keyword in ['charging', 'lädt', 'laden', 'connected'])
             except Exception as e:
                 self.logger.error(f"Fehler beim Abrufen des Ladestatus: {e}")
-
-            # KM-Stand (optional)
-            if self.mileage_entity:
-                try:
-                    url = f"{self.base_url}/api/states/{self.mileage_entity}"
-                    response = self.session.get(url, timeout=10)
-                    response.raise_for_status()
-                    data = response.json()
-                    result['mileage'] = int(float(data.get('state', 0)))
-                except Exception as e:
-                    self.logger.debug(f"KM-Stand nicht verfügbar: {e}")
-
-            # Standort (optional)
-            if self.location_entity:
-                try:
-                    url = f"{self.base_url}/api/states/{self.location_entity}"
-                    response = self.session.get(url, timeout=10)
-                    response.raise_for_status()
-                    data = response.json()
-                    result['location'] = data.get('state', 'unknown')
-                except Exception as e:
-                    self.logger.debug(f"Standort nicht verfügbar: {e}")
 
             # Bild laden (wenn noch nicht gecacht)
             if self.car_image is None:
@@ -162,17 +136,34 @@ class TaycanWidget(BaseWidget):
                 response = self.session.get(image_url, timeout=15)
                 response.raise_for_status()
 
-                # Bild laden und für E-Ink konvertieren
+                # Bild laden und für E-Ink optimieren
                 img = Image.open(BytesIO(response.content))
 
-                # Konvertiere zu Graustufen
+                # Konvertiere zu RGB falls nötig, dann zu Graustufen
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
                 img = img.convert('L')
 
-                # Resize auf passende Größe (größer für schönere Darstellung)
-                img = img.resize((280, 140), Image.Resampling.LANCZOS)
+                # Resize mit LANCZOS für beste Qualität
+                img = img.resize((500, 250), Image.Resampling.LANCZOS)
 
-                # Konvertiere zu 1-bit für E-Ink
-                self.car_image = img.convert('1')
+                # Optimierung für E-Ink Display
+                from PIL import ImageEnhance, ImageFilter
+
+                # Schärfen für bessere Details
+                img = img.filter(ImageFilter.SHARPEN)
+
+                # Kontrast erhöhen
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(1.4)
+
+                # Helligkeit anpassen
+                enhancer = ImageEnhance.Brightness(img)
+                img = enhancer.enhance(1.05)
+
+                # WICHTIG: Direkt zu 1-bit mit Floyd-Steinberg Dithering konvertieren
+                # Das ist besser als es später beim paste zu machen
+                self.car_image = img.convert('1', dither=Image.Dither.FLOYDSTEINBERG)
 
                 self.logger.info("Taycan Bild erfolgreich geladen")
 
@@ -201,23 +192,27 @@ class TaycanWidget(BaseWidget):
         if data.get('charging', False):
             charging_status = data.get('charging_status', '')
             draw.text((x + 60, y + 35), f"🔌 {charging_status}", font=fonts['20'], fill=0)
+            y_offset = y + 50
+        else:
+            y_offset = y + 32
 
-        y_offset = y + 70
-
-        # Auto Bild (wenn verfügbar) - größer und zentriert
+        # Auto Bild (wenn verfügbar)
         if data.get('image_available') and self.car_image:
             # Zentriere das Bild
-            img_x = x + (width - 280) // 2
+            img_x = x + (width - 500) // 2
             draw.bitmap((img_x, y_offset), self.car_image, fill=0)
-            y_offset += 150  # Platz für das größere Bild
+            y_offset += 260
 
         # Batteriestand und Reichweite nebeneinander
         battery = data.get('battery', 0)
         range_km = data.get('range', 0)
         range_unit = data.get('range_unit', 'km')
 
+        # Berechne Positionen für zentrierte Anzeige
+        section_width = width // 2
+
         # Batterie links
-        battery_x = x
+        battery_x = x + 20
         draw.text((battery_x, y_offset), "Batterie:", font=fonts['24'], fill=0)
         battery_text = f"{battery:.0f}%"
         draw.text((battery_x, y_offset + 30), battery_text, font=fonts['60'], fill=0)
@@ -232,6 +227,6 @@ class TaycanWidget(BaseWidget):
             draw.rectangle((battery_x + 2, bar_y + 2, battery_x + 2 + fill_width, bar_y + bar_height - 2), fill=0)
 
         # Reichweite rechts
-        range_x = x + 220
+        range_x = x + section_width + 20
         draw.text((range_x, y_offset), "Reichweite:", font=fonts['24'], fill=0)
         draw.text((range_x, y_offset + 30), f"{range_km} {range_unit}", font=fonts['60'], fill=0)

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ePaper Dashboard Config</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr 400px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 100px);
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .panel h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .widget-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .widget-item:hover {
+            background: #e9ecef;
+            border-color: #3498db;
+        }
+
+        .widget-item.active {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+        }
+
+        .widget-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .widget-desc {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .config-widget {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .config-widget.disabled {
+            opacity: 0.6;
+            background: #f8f9fa;
+        }
+
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .config-header h3 {
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .config-info {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .preview-image {
+            flex: 1;
+            background: #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-image img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
+
+        .preview-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .preview-actions button {
+            flex: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #95a5a6;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #27ae60;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ePaper Dashboard Configuration</h1>
+        <div class="subtitle">Manage your widgets and display settings</div>
+    </div>
+
+    <div class="container">
+        <!-- Available Widgets -->
+        <div class="panel">
+            <h2>Available Widgets</h2>
+            <div id="available-widgets"></div>
+        </div>
+
+        <!-- Configured Widgets -->
+        <div class="panel">
+            <h2>Configured Widgets</h2>
+            <div id="message"></div>
+            <div id="configured-widgets"></div>
+        </div>
+
+        <!-- Preview -->
+        <div class="panel preview-container">
+            <h2>Dashboard Preview</h2>
+            <div class="preview-image" id="preview">
+                <div style="color: #95a5a6;">Preview wird geladen...</div>
+            </div>
+            <div class="preview-actions">
+                <button class="btn btn-primary" onclick="refreshPreview()">Refresh</button>
+                <button class="btn btn-success" onclick="restartDashboard()">Restart Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Widget Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Widget</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div id="editForm"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentConfig = null;
+        let availableWidgets = [];
+        let editingWidgetIndex = -1;
+
+        // Load initial data
+        async function loadData() {
+            try {
+                // Load config
+                const configRes = await fetch('/api/config');
+                const configData = await configRes.json();
+                if (configData.success) {
+                    currentConfig = configData.config;
+                }
+
+                // Load available widgets
+                const widgetsRes = await fetch('/api/widgets');
+                const widgetsData = await widgetsRes.json();
+                if (widgetsData.success) {
+                    availableWidgets = widgetsData.widgets;
+                }
+
+                renderAvailableWidgets();
+                renderConfiguredWidgets();
+                refreshPreview();
+            } catch (error) {
+                showMessage('Error loading data: ' + error.message, 'error');
+            }
+        }
+
+        function renderAvailableWidgets() {
+            const container = document.getElementById('available-widgets');
+            container.innerHTML = availableWidgets.map(widget => `
+                <div class="widget-item" onclick="addWidget('${widget.type}')">
+                    <div class="widget-name">${widget.name}</div>
+                    <div class="widget-desc">${widget.description}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderConfiguredWidgets() {
+            const container = document.getElementById('configured-widgets');
+            if (!currentConfig || !currentConfig.widgets) {
+                container.innerHTML = '<div style="color: #6c757d;">No widgets configured</div>';
+                return;
+            }
+
+            container.innerHTML = currentConfig.widgets.map((widget, index) => {
+                const enabled = widget.enabled !== false;
+                return `
+                    <div class="config-widget ${enabled ? '' : 'disabled'}">
+                        <div class="config-header">
+                            <h3>${widget.name || widget.type}</h3>
+                            <div class="config-actions">
+                                <label class="toggle">
+                                    <input type="checkbox" ${enabled ? 'checked' : ''}
+                                           onchange="toggleWidget(${index})">
+                                    <span class="slider"></span>
+                                </label>
+                                <button class="btn btn-primary" onclick="editWidget(${index})">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteWidget(${index})">Delete</button>
+                            </div>
+                        </div>
+                        <div class="config-info">
+                            Type: ${widget.type} |
+                            Position: [${widget.position[0]}, ${widget.position[1]}] |
+                            Size: [${widget.size[0]}, ${widget.size[1]}]
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addWidget(type) {
+            const widgetDef = availableWidgets.find(w => w.type === type);
+            if (!widgetDef) return;
+
+            // Create new widget with defaults
+            const newWidget = {
+                name: widgetDef.name.toLowerCase().replace(/\s+/g, '_'),
+                type: type,
+                enabled: true,
+                position: [20, 20],
+                size: [400, 200],
+                update_interval: 60,
+                initial_delay: 0,
+                config: {}
+            };
+
+            currentConfig.widgets.push(newWidget);
+            editingWidgetIndex = currentConfig.widgets.length - 1;
+            showEditModal(newWidget);
+        }
+
+        function editWidget(index) {
+            editingWidgetIndex = index;
+            showEditModal(currentConfig.widgets[index]);
+        }
+
+        function toggleWidget(index) {
+            const widget = currentConfig.widgets[index];
+            widget.enabled = !widget.enabled;
+            renderConfiguredWidgets();
+            saveConfig();
+        }
+
+        function deleteWidget(index) {
+            if (confirm('Delete this widget?')) {
+                currentConfig.widgets.splice(index, 1);
+                saveConfig();
+            }
+        }
+
+        function showEditModal(widget) {
+            const widgetDef = availableWidgets.find(w => w.type === widget.type);
+            const form = document.getElementById('editForm');
+
+            let configFieldsHTML = '';
+
+            // Generate specific fields for known config options
+            if (widgetDef && widgetDef.config_options && Object.keys(widgetDef.config_options).length > 0) {
+                configFieldsHTML = '<h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Widget Configuration</h3>';
+
+                for (const [key, description] of Object.entries(widgetDef.config_options)) {
+                    const currentValue = widget.config[key] || '';
+                    const isBoolean = description.toLowerCase().includes('true') || description.toLowerCase().includes('false');
+                    const isNumber = description.toLowerCase().includes('number') || key.includes('interval') || key.includes('delay');
+
+                    configFieldsHTML += `
+                        <div class="form-group">
+                            <label>${key}</label>
+                            <small style="display: block; color: #6c757d; margin-bottom: 5px;">${description}</small>
+                            ${isBoolean ?
+                                `<select class="config-field" data-key="${key}">
+                                    <option value="true" ${currentValue === true ? 'selected' : ''}>True</option>
+                                    <option value="false" ${currentValue === false ? 'selected' : ''}>False</option>
+                                </select>` :
+                                isNumber ?
+                                `<input type="number" class="config-field" data-key="${key}" value="${currentValue}">` :
+                                `<input type="text" class="config-field" data-key="${key}" value="${currentValue}">`
+                            }
+                        </div>
+                    `;
+                }
+            }
+
+            // Always show JSON editor for advanced users
+            configFieldsHTML += `
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600; margin-bottom: 10px;">Advanced: Edit JSON directly</summary>
+                    <div class="form-group">
+                        <textarea id="widget-config-json" style="font-family: monospace; min-height: 150px;">${JSON.stringify(widget.config, null, 2)}</textarea>
+                    </div>
+                </details>
+            `;
+
+            form.innerHTML = `
+                <div class="form-group">
+                    <label>Widget Name</label>
+                    <input type="text" id="widget-name" value="${widget.name || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Widget Type</label>
+                    <input type="text" value="${widget.type}" disabled style="background: #f0f0f0;">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Position X</label>
+                        <input type="number" id="pos-x" value="${widget.position[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>Position Y</label>
+                        <input type="number" id="pos-y" value="${widget.position[1]}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Width</label>
+                        <input type="number" id="size-w" value="${widget.size[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>Height</label>
+                        <input type="number" id="size-h" value="${widget.size[1]}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Update Interval (s)</label>
+                        <input type="number" id="update-int" value="${widget.update_interval || 60}">
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Delay (s)</label>
+                        <input type="number" id="initial-delay" value="${widget.initial_delay || 0}">
+                    </div>
+                </div>
+                ${configFieldsHTML}
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="saveWidgetEdit()">Save</button>
+                    <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            `;
+
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveWidgetEdit() {
+            try {
+                const widget = currentConfig.widgets[editingWidgetIndex];
+                widget.name = document.getElementById('widget-name').value;
+                widget.position = [
+                    parseInt(document.getElementById('pos-x').value),
+                    parseInt(document.getElementById('pos-y').value)
+                ];
+                widget.size = [
+                    parseInt(document.getElementById('size-w').value),
+                    parseInt(document.getElementById('size-h').value)
+                ];
+                widget.update_interval = parseInt(document.getElementById('update-int').value);
+                widget.initial_delay = parseInt(document.getElementById('initial-delay').value);
+
+                // Read config from individual fields
+                const configFields = document.querySelectorAll('.config-field');
+                const newConfig = {};
+                configFields.forEach(field => {
+                    const key = field.getAttribute('data-key');
+                    let value = field.value;
+
+                    // Convert types
+                    if (field.type === 'number') {
+                        value = parseFloat(value);
+                    } else if (field.tagName === 'SELECT') {
+                        value = value === 'true';
+                    }
+
+                    newConfig[key] = value;
+                });
+
+                // Merge with JSON editor if it was used
+                const jsonEditor = document.getElementById('widget-config-json');
+                if (jsonEditor) {
+                    try {
+                        const jsonConfig = JSON.parse(jsonEditor.value);
+                        // JSON takes precedence
+                        Object.assign(newConfig, jsonConfig);
+                    } catch (e) {
+                        // If JSON is invalid, just use field values
+                    }
+                }
+
+                widget.config = newConfig;
+
+                closeEditModal();
+                saveConfig();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function saveConfig() {
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentConfig)
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Configuration saved successfully!', 'success');
+                    renderConfiguredWidgets();
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error saving configuration: ' + error.message, 'error');
+            }
+        }
+
+        async function restartDashboard() {
+            if (!confirm('Restart the dashboard? This will apply all changes.')) return;
+
+            try {
+                const response = await fetch('/api/restart', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Dashboard restarting...', 'success');
+                    setTimeout(refreshPreview, 5000);
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error restarting dashboard: ' + error.message, 'error');
+            }
+        }
+
+        function refreshPreview() {
+            const preview = document.getElementById('preview');
+            const timestamp = new Date().getTime();
+            preview.innerHTML = `<img src="/api/preview?t=${timestamp}" alt="Dashboard Preview"
+                                     onerror="this.parentElement.innerHTML='<div style=\'color: #95a5a6;\'>Preview not available</div>'">`;
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+
+        // Load data on page load
+        loadData();
+
+        // Auto-refresh preview every 60 seconds
+        setInterval(refreshPreview, 60000);
+    </script>
+</body>
+</html>

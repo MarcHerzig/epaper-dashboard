@@ -39,7 +39,7 @@ trap cleanup SIGINT SIGTERM
 
 # Start dashboard in background
 echo "Starting dashboard..."
-python3 main_v2.py &
+python3 main.py &
 DASHBOARD_PID=$!
 echo "  ✓ Dashboard running (PID: $DASHBOARD_PID)"
 echo ""

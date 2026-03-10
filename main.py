@@ -126,15 +126,15 @@ def load_fonts():
             return ImageFont.load_default()
 
     return {
-        '20': load_font('Aldrich-Regular.ttc', 20),
-        '24': load_font('Aldrich-Regular.ttc', 24),
-        '28': load_font('Aldrich-Regular.ttc', 28),
-        '32': load_font('Aldrich-Regular.ttc', 32),
-        '35': load_font('Aldrich-Regular.ttc', 35),
-        '40': load_font('Aldrich-Regular.ttc', 40),
-        '60': load_font('Aldrich-Regular.ttc', 60),
-        '80': load_font('Aldrich-Regular.ttc', 80),
-        'clock': load_font('advanced_led_board-7.ttc', 180),
+        '20': load_font('Aldrich-Regular.ttc', 18),
+        '24': load_font('Aldrich-Regular.ttc', 22),
+        '28': load_font('Aldrich-Regular.ttc', 25),
+        '32': load_font('Aldrich-Regular.ttc', 29),
+        '35': load_font('Aldrich-Regular.ttc', 32),
+        '40': load_font('Aldrich-Regular.ttc', 36),
+        '60': load_font('Aldrich-Regular.ttc', 54),
+        '80': load_font('Aldrich-Regular.ttc', 72),
+        'clock': load_font('advanced_led_board-7.ttc', 162),
     }
 
 
