@@ -37,17 +37,17 @@ A modular, extensible dashboard system for the Waveshare 10.85" ePaper display (
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/epaper-dashboard.git
+git clone https://github.com/MarcHerzig/epaper-dashboard.git
 cd epaper-dashboard
 
 # Install dependencies
 pip3 install -r requirements.txt
 
 # Run on Raspberry Pi
-python3 main_v2.py
+python3 main.py
 
 # Or run emulator (for development on Mac/PC)
-python3 emulator.py
+./run_dashboard.sh
 ```
 
 ### Development on Mac/PC
@@ -157,7 +157,7 @@ That's it! Your widget will be auto-discovered and loaded.
 
 ```
 ┌─────────────────────────────────────────────┐
-│              main_v2.py                     │
+│              main.py                        │
 │         (Main Event Loop)                   │
 └──────────────────┬──────────────────────────┘
                    │
@@ -217,9 +217,10 @@ python3 -c "from test_widgets import *; test_widget_rendering()"
 
 ```
 .
-├── main_v2.py              # Main application
+├── main.py                 # Main application
 ├── config.yaml             # Configuration file
 ├── emulator.py             # Display emulator
+├── run_dashboard.sh        # Live preview launcher
 ├── requirements.txt        # Python dependencies
 │
 ├── widgets/                # Widget modules
@@ -314,8 +315,8 @@ Contributions are welcome! Please:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/epaper-dashboard/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/epaper-dashboard/discussions)
+- **Issues**: [GitHub Issues](https://github.com/MarcHerzig/epaper-dashboard/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/MarcHerzig/epaper-dashboard/discussions)
 
 ---
 
